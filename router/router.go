@@ -10,6 +10,6 @@ import (
 func Routes(router *gin.Engine, app *initialize.Application) {
 	handler := handler.NewHandler(app)
 	router.GET("/models", handler.Get)
-	router.POST("/generate", handler.Post)
+	router.POST("/post", handler.CreatePost)
 	router.GET("/generation/:id", handler.Get)
 }

@@ -1,31 +1,32 @@
 package repository
 
 import (
-	"blogging-platform-api/domain"
+	"blogging-platform-api/domain/dto"
 	"blogging-platform-api/utils/pagination"
 
 	"gorm.io/gorm"
 )
 
 type (
-	IRepository interface {
+	IPostRepository interface {
+		Create(payload *dto.Post) error
+
 		GetWithPagination(pageable pagination.Pageable) (*pagination.Page, error)
-		Create(payload domain.StructName) error
-		GetByUUID(uuid string) (*domain.StructName, error)
+		GetByUUID(uuid string) (*dto.Post, error)
 	}
 
-	Repository struct {
+	PostRepository struct {
 		db *gorm.DB
 	}
 )
 
-func NewRepository(db *gorm.DB) IRepository {
-	return &Repository{
+func NewPostRepository(db *gorm.DB) IPostRepository {
+	return &PostRepository{
 		db: db,
 	}
 }
 
-func (r *Repository) GetWithPagination(pageable pagination.Pageable) (*pagination.Page, error) {
+func (r *PostRepository) GetWithPagination(pageable pagination.Pageable) (*pagination.Page, error) {
 	var count int64
 	var err error
 
@@ -36,7 +37,7 @@ func (r *Repository) GetWithPagination(pageable pagination.Pageable) (*paginatio
 
 	initArgumentsIndex := len(arguments)
 
-	chainMethod := r.db.Model(domain.StructName{})
+	chainMethod := r.db.Model(dto.Post{})
 
 	if arguments[0].(string) != "%%" {
 		chainMethod = chainMethod.Where("name ILIKE ?", arguments[0].(string))
@@ -58,7 +59,7 @@ func (r *Repository) GetWithPagination(pageable pagination.Pageable) (*paginatio
 	paginator := pagination.NewPaginator(pageable.GetPage(), pageable.GetLimit(), int(count))
 	arguments = append(arguments, pageable.SortByFunc(), paginator.PerPageNums, paginator.Offset())
 
-	var products []*domain.StructName
+	var products []*dto.Post
 
 	err = chainMethod.
 		Order(arguments[initArgumentsIndex].(string)).
@@ -74,12 +75,12 @@ func (r *Repository) GetWithPagination(pageable pagination.Pageable) (*paginatio
 	return paginator.Pageable(products), nil
 }
 
-func (r *Repository) Create(payload domain.StructName) error {
+func (r *PostRepository) Create(payload *dto.Post) error {
 	return r.db.Create(&payload).Error
 }
 
-func (r *Repository) GetByUUID(uuid string) (*domain.StructName, error) {
-	data := new(domain.StructName)
+func (r *PostRepository) GetByUUID(uuid string) (*dto.Post, error) {
+	data := new(dto.Post)
 	if err := r.db.Where("id", uuid).First(&data).Error; err != nil {
 		return nil, err
 	}

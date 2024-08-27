@@ -1,7 +1,7 @@
 package cache
 
 import (
-	"blogging-platform-api/domain"
+	"blogging-platform-api/domain/dto"
 	log "blogging-platform-api/logger"
 	"encoding/json"
 	"time"
@@ -11,8 +11,8 @@ import (
 
 type (
 	ICache interface {
-		Set(data *domain.StructName) error
-		Get() (*domain.StructName, error)
+		Set(data *dto.Post) error
+		Get() (*dto.Post, error)
 	}
 
 	Cache struct {
@@ -32,7 +32,7 @@ func (c *Cache) getKey() string {
 	return "<cache key>"
 }
 
-func (c *Cache) Set(data *domain.StructName) error {
+func (c *Cache) Set(data *dto.Post) error {
 	val, err := json.Marshal(data)
 	if err != nil {
 		return err
@@ -47,8 +47,8 @@ func (c *Cache) Set(data *domain.StructName) error {
 	return nil
 }
 
-func (c *Cache) Get() (*domain.StructName, error) {
-	response := new(domain.StructName)
+func (c *Cache) Get() (*dto.Post, error) {
+	response := new(dto.Post)
 
 	val, err := c.redis.Get(c.getKey()).Bytes()
 	if err != nil {

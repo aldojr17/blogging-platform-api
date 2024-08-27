@@ -13,16 +13,35 @@ import (
 )
 
 type Handler struct {
-	service service.IService
+	service service.IPostService
 }
 
 func NewHandler(app *initialize.Application) *Handler {
 	return &Handler{
-		service: service.NewService(
+		service: service.NewPostService(
 			cache.NewCache(app.Redis, app.Config.Redis.GetDefaultTTL()),
-			repository.NewRepository(app.Database),
+			repository.NewPostRepository(app.Database),
+			repository.NewTagRepository(app.Database),
+			repository.NewPostTagRepository(app.Database),
 		),
 	}
+}
+
+func (h *Handler) CreatePost(c *gin.Context) {
+	var payload domain.CreatePostRequest
+
+	if err := payload.Validate(c); err != nil {
+		ResponseBadRequest(c, err)
+		return
+	}
+
+	data, err := h.service.CreatePost(payload)
+	if err != nil {
+		ResponseInternalServerError(c, err)
+		return
+	}
+
+	ResponseCreated(c, data, "New post created.")
 }
 
 func (h *Handler) Get(c *gin.Context) {
@@ -33,23 +52,6 @@ func (h *Handler) Get(c *gin.Context) {
 	}
 
 	ResponseOK(c, data, "Success")
-}
-
-func (h *Handler) Post(c *gin.Context) {
-	var payload domain.StructName
-
-	if err := payload.Validate(c); err != nil {
-		ResponseBadRequest(c, err)
-		return
-	}
-
-	data, err := h.service.Get()
-	if err != nil {
-		ResponseInternalServerError(c, err)
-		return
-	}
-
-	ResponseCreated(c, data, "Success")
 }
 
 func (h *Handler) GetWithPagination(c *gin.Context) {
