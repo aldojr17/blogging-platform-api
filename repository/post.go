@@ -54,7 +54,7 @@ func (r *PostRepository) GetAllPost(pageable pagination.Pageable) (*pagination.P
 
 	if arguments[0] != nil {
 		term := arguments[0].(string)
-		chainMethod = chainMethod.Where("title ILIKE ?", term).Or("content ILIKE ?", term).Or("category ILIKE ?", term)
+		chainMethod = chainMethod.Where("title LIKE ?", term).Or("content LIKE ?", term).Or("category LIKE ?", term)
 	}
 
 	// limit pagination
