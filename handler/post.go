@@ -8,6 +8,7 @@ import (
 	"blogging-platform-api/service"
 	"blogging-platform-api/utils/pagination"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -44,14 +45,22 @@ func (h *Handler) CreatePost(c *gin.Context) {
 	ResponseCreated(c, data, "New post created.")
 }
 
-func (h *Handler) Get(c *gin.Context) {
-	data, err := h.service.Get()
+func (h *Handler) GetDetailPost(c *gin.Context) {
+	_id := c.Param("id")
+
+	postId, err := strconv.Atoi(_id)
+	if err != nil {
+		ResponseBadRequest(c, err)
+		return
+	}
+
+	data, err := h.service.GetDetailPost(postId)
 	if err != nil {
 		ResponseInternalServerError(c, err)
 		return
 	}
 
-	ResponseOK(c, data, "Success")
+	ResponseOK(c, data, "Successfully get post detail")
 }
 
 func (h *Handler) GetWithPagination(c *gin.Context) {

@@ -12,9 +12,9 @@ import (
 type (
 	IPostService interface {
 		CreatePost(payload domain.CreatePostRequest) (*domain.CreatePostResponse, error)
+		GetDetailPost(id int) (*domain.GetDetailPostResponse, error)
 
 		GetWithPagination(pageable pagination.Pageable) (*pagination.Page, error)
-		Get() (*dto.Post, error)
 	}
 
 	PostService struct {
@@ -90,8 +90,8 @@ func (s *PostService) CreatePost(payload domain.CreatePostRequest) (*domain.Crea
 	return &response, nil
 }
 
-func (s *PostService) GetWithPagination(pageable pagination.Pageable) (*pagination.Page, error) {
-	resp, err := s.postRepository.GetWithPagination(pageable)
+func (s *PostService) GetDetailPost(id int) (*domain.GetDetailPostResponse, error) {
+	resp, err := s.postRepository.GetByID(id)
 	if err != nil {
 		return nil, err
 	}
@@ -99,18 +99,9 @@ func (s *PostService) GetWithPagination(pageable pagination.Pageable) (*paginati
 	return resp, nil
 }
 
-func (s *PostService) Get() (*dto.Post, error) {
-	data, _ := s.cache.Get()
-	if data != nil {
-		return data, nil
-	}
-
-	resp, err := s.postRepository.GetByUUID("uuid")
+func (s *PostService) GetWithPagination(pageable pagination.Pageable) (*pagination.Page, error) {
+	resp, err := s.postRepository.GetWithPagination(pageable)
 	if err != nil {
-		return nil, err
-	}
-
-	if err = s.cache.Set(resp); err != nil {
 		return nil, err
 	}
 

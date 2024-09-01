@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"blogging-platform-api/domain"
 	"blogging-platform-api/domain/dto"
 	"blogging-platform-api/utils/pagination"
 
@@ -10,9 +11,9 @@ import (
 type (
 	IPostRepository interface {
 		Create(payload *dto.Post) error
+		GetByID(id int) (*domain.GetDetailPostResponse, error)
 
 		GetWithPagination(pageable pagination.Pageable) (*pagination.Page, error)
-		GetByUUID(uuid string) (*dto.Post, error)
 	}
 
 	PostRepository struct {
@@ -24,6 +25,20 @@ func NewPostRepository(db *gorm.DB) IPostRepository {
 	return &PostRepository{
 		db: db,
 	}
+}
+
+func (r *PostRepository) Create(payload *dto.Post) error {
+	return r.db.Create(&payload).Error
+}
+
+func (r *PostRepository) GetByID(id int) (*domain.GetDetailPostResponse, error) {
+	post := new(domain.GetDetailPostResponse)
+
+	if err := r.db.Where("id", id).First(&post).Error; err != nil {
+		return nil, err
+	}
+
+	return post, nil
 }
 
 func (r *PostRepository) GetWithPagination(pageable pagination.Pageable) (*pagination.Page, error) {
@@ -73,17 +88,4 @@ func (r *PostRepository) GetWithPagination(pageable pagination.Pageable) (*pagin
 	}
 
 	return paginator.Pageable(products), nil
-}
-
-func (r *PostRepository) Create(payload *dto.Post) error {
-	return r.db.Create(&payload).Error
-}
-
-func (r *PostRepository) GetByUUID(uuid string) (*dto.Post, error) {
-	data := new(dto.Post)
-	if err := r.db.Where("id", uuid).First(&data).Error; err != nil {
-		return nil, err
-	}
-
-	return data, nil
 }

@@ -1,7 +1,9 @@
 package utils
 
 import (
+	log "blogging-platform-api/logger"
 	"os"
+	"strconv"
 	"time"
 )
 
@@ -11,6 +13,15 @@ func GetEnv(key, fallback string) string {
 	}
 
 	return fallback
+}
+
+func ConvertToInteger(value string) int {
+	converted, err := strconv.Atoi(value)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return converted
 }
 
 func GenerateCurrentTimestamp() int64 {
