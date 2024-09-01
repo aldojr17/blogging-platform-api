@@ -13,6 +13,7 @@ func Routes(router *gin.Engine, app *initialize.Application) {
 	postsGroup := router.Group("/posts")
 	{
 		postsGroup.GET("/:id", handler.GetDetailPost)
+		postsGroup.GET("", handler.GetAllPost)
 		postsGroup.POST("", handler.CreatePost)
 	}
 }

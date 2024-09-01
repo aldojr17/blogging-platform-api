@@ -63,14 +63,14 @@ func (h *Handler) GetDetailPost(c *gin.Context) {
 	ResponseOK(c, data, "Successfully get post detail")
 }
 
-func (h *Handler) GetWithPagination(c *gin.Context) {
-	data, err := h.service.GetWithPagination(newPageableRequest(c.Request))
+func (h *Handler) GetAllPost(c *gin.Context) {
+	data, err := h.service.GetAllPost(newPageableRequest(c.Request))
 	if err != nil {
 		ResponseInternalServerError(c, err)
 		return
 	}
 
-	PaginationSuccessResponse(c, data, "Success")
+	PaginationSuccessResponse(c, data, "Successfully get all posts")
 }
 
 func newPageableRequest(r *http.Request) *domain.PageableRequest {
@@ -80,15 +80,14 @@ func newPageableRequest(r *http.Request) *domain.PageableRequest {
 	p.SortBy = pagination.SortValueFromQueryParam(r)
 
 	if p.SortBy == "" {
-		p.SortBy = "<default sort by>"
+		p.SortBy = "id"
 	}
 
 	p.Sort = pagination.SortDirectionFromQueryParam(r)
 	p.Search = map[string]interface{}{}
 	p.Filters = map[string]interface{}{}
 
-	p.Search["<search query>"] = queryLikeParamOrNull(r, "<search query>")
-	p.Filters["<filter by query>"] = queryParamOrNull(r, "<filter by query>")
+	p.Search[domain.SEARCH_TERM] = queryLikeParamOrNull(r, domain.SEARCH_TERM)
 
 	return p
 }

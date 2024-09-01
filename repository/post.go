@@ -12,8 +12,7 @@ type (
 	IPostRepository interface {
 		Create(payload *dto.Post) error
 		GetByID(id int) (*domain.GetDetailPostResponse, error)
-
-		GetWithPagination(pageable pagination.Pageable) (*pagination.Page, error)
+		GetAllPost(pageable pagination.Pageable) (*pagination.Page, error)
 	}
 
 	PostRepository struct {
@@ -41,27 +40,27 @@ func (r *PostRepository) GetByID(id int) (*domain.GetDetailPostResponse, error) 
 	return post, nil
 }
 
-func (r *PostRepository) GetWithPagination(pageable pagination.Pageable) (*pagination.Page, error) {
+func (r *PostRepository) GetAllPost(pageable pagination.Pageable) (*pagination.Page, error) {
 	var count int64
 	var err error
 
 	arguments := []interface{}{
-		pageable.SearchParams()["<search query>"],
-		pageable.FilterParams()["<filter by query>"],
+		pageable.SearchParams()[domain.SEARCH_TERM],
 	}
 
 	initArgumentsIndex := len(arguments)
 
-	chainMethod := r.db.Model(dto.Post{})
+	chainMethod := r.db.Model(domain.GetDetailPostResponse{})
 
-	if arguments[0].(string) != "%%" {
-		chainMethod = chainMethod.Where("name ILIKE ?", arguments[0].(string))
+	if arguments[0] != nil {
+		term := arguments[0].(string)
+		chainMethod = chainMethod.Where("title ILIKE ?", term).Or("content ILIKE ?", term).Or("category ILIKE ?", term)
 	}
 
 	// limit pagination
 	limit := int(1000 * ((pageable.GetPage() / (1000 / pageable.GetLimit())) + 1))
 
-	err = r.db.Select("count(*)").Table("(?) as <table name>", chainMethod.Session(&gorm.Session{}).Select("*").Limit(limit)).Scan(&count).Error
+	err = r.db.Select("count(*)").Table("(?) as posts", chainMethod.Session(&gorm.Session{}).Select("*").Limit(limit)).Scan(&count).Error
 
 	if err != nil {
 		return pagination.NewPaginator(pageable.GetPage(), pageable.GetLimit(), 0).Pageable([]interface{}{}), err
@@ -74,7 +73,7 @@ func (r *PostRepository) GetWithPagination(pageable pagination.Pageable) (*pagin
 	paginator := pagination.NewPaginator(pageable.GetPage(), pageable.GetLimit(), int(count))
 	arguments = append(arguments, pageable.SortByFunc(), paginator.PerPageNums, paginator.Offset())
 
-	var products []*dto.Post
+	var products []*domain.GetDetailPostResponse
 
 	err = chainMethod.
 		Order(arguments[initArgumentsIndex].(string)).

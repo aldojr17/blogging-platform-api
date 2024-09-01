@@ -13,8 +13,7 @@ type (
 	IPostService interface {
 		CreatePost(payload domain.CreatePostRequest) (*domain.CreatePostResponse, error)
 		GetDetailPost(id int) (*domain.GetDetailPostResponse, error)
-
-		GetWithPagination(pageable pagination.Pageable) (*pagination.Page, error)
+		GetAllPost(pageable pagination.Pageable) (*pagination.Page, error)
 	}
 
 	PostService struct {
@@ -99,8 +98,8 @@ func (s *PostService) GetDetailPost(id int) (*domain.GetDetailPostResponse, erro
 	return resp, nil
 }
 
-func (s *PostService) GetWithPagination(pageable pagination.Pageable) (*pagination.Page, error) {
-	resp, err := s.postRepository.GetWithPagination(pageable)
+func (s *PostService) GetAllPost(pageable pagination.Pageable) (*pagination.Page, error) {
+	resp, err := s.postRepository.GetAllPost(pageable)
 	if err != nil {
 		return nil, err
 	}

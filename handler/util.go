@@ -71,7 +71,7 @@ func queryLikeParamOrNull(req *http.Request, key string) interface{} {
 	likeParam := queryParamOrNull(req, key)
 	if likeParam != nil {
 		return "%" + likeParam.(string) + "%"
-	} else {
-		return "%%"
 	}
+
+	return nil
 }

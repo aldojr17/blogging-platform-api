@@ -5,3 +5,7 @@ const (
 	TABLE_TAG_TAB      = "tag_tab"
 	TABLE_POST_TAG_TAB = "post_tag_tab"
 )
+
+const (
+	SEARCH_TERM = "term"
+)

@@ -28,7 +28,7 @@ func (p *PageableRequest) GetLimit() int {
 }
 func (p *PageableRequest) SortByFunc() string {
 	if p.SortBy == "" {
-		return "name ASC"
+		return "id ASC"
 	}
 
 	if p.Sort == "asc" {
